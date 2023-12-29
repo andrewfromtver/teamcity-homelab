@@ -36,6 +36,9 @@ networks:
 services:
   # teamcity database
   teamcity-db:
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
     image: postgres:${PG_VERSION}
     container_name: teamcity-db
     restart: unless-stopped
@@ -64,6 +67,9 @@ services:
 
   # teamcity server
   teamcity-server:
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
     image: jetbrains/teamcity-server:${TEAMCITY_VERSION}
     container_name: teamcity-server
     restart: unless-stopped
@@ -84,14 +90,17 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "2"
-          memory: 2G
+          cpus: "4"
+          memory: 4G
     depends_on:
       teamcity-db:
         condition: service_healthy
     
   # teamcity agent 1
   teamcity-agent-1:
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
     image: jetbrains/teamcity-agent:${TEAMCITY_VERSION}-linux-sudo
     container_name: teamcity-agent-1
     restart: unless-stopped
@@ -113,14 +122,17 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: 1G
+          cpus: "0.5"
+          memory: 0.5G
     depends_on:
       teamcity-server:
         condition: service_healthy
 
   # teamcity agent 2
   teamcity-agent-2:
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
     image: jetbrains/teamcity-agent:${TEAMCITY_VERSION}-linux-sudo
     container_name: teamcity-agent-2
     restart: unless-stopped
@@ -142,14 +154,17 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: 1G
+          cpus: "0.5"
+          memory: 0.5G
     depends_on:
       teamcity-server:
         condition: service_healthy
     
   # teamcity agent 3
   teamcity-agent-3:
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
     image: jetbrains/teamcity-agent:${TEAMCITY_VERSION}-linux-sudo
     container_name: teamcity-agent-3
     restart: unless-stopped
@@ -171,8 +186,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: 1G
+          cpus: "0.5"
+          memory: 0.5G
     depends_on:
       teamcity-server:
         condition: service_healthy
