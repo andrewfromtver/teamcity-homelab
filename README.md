@@ -2,7 +2,7 @@
 
 * `PG_VERSION`
 * `PG_PASSWORD`
-* `G_USER`
+* `PG_USER`
 * `PG_DB`
 * `DB_PORT`
 * `TEAMCITY_VERSION`
