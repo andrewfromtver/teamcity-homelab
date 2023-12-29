@@ -1,0 +1,178 @@
+version: '3.9'
+
+volumes:
+  postgres_data:
+  teamcity_data:
+  teamcity_logs:
+  teamcity_temp:
+  teamcity_agent_tools_1:
+  teamcity_agent_work_1:
+  teamcity_agent_logs_1:
+  teamcity_agent_plugins_1:
+  teamcity_agent_docker_1:
+  teamcity_agent_system_1:
+  teamcity_agent_temp_1:
+  teamcity_agent_conf_1:
+  teamcity_agent_tools_2:
+  teamcity_agent_work_2:
+  teamcity_agent_logs_2:
+  teamcity_agent_plugins_2:
+  teamcity_agent_docker_2:
+  teamcity_agent_system_2:
+  teamcity_agent_temp_2:
+  teamcity_agent_conf_2:  
+  teamcity_agent_tools_3:
+  teamcity_agent_work_3:
+  teamcity_agent_logs_3:
+  teamcity_agent_plugins_3:
+  teamcity_agent_docker_3:
+  teamcity_agent_system_3:
+  teamcity_agent_temp_3:
+  teamcity_agent_conf_3:
+
+networks:
+  teamcity_net:
+
+services:
+  # teamcity database
+  teamcity-db:
+    image: postgres:${PG_VERSION}
+    container_name: teamcity-db
+    restart: unless-stopped
+    privileged: false
+    environment:
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_DB=${PG_DB}
+      - PG_DATA=/var/lib/postgresql/data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 0.0.0.0:${DB_PORT}:5432
+    networks:
+      - teamcity_net
+    healthcheck:
+      test: pg_isready -U ${PG_USER} -d ${PG_DB}
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+
+  # teamcity server
+  teamcity-server:
+    image: jetbrains/teamcity-server:${TEAMCITY_VERSION}
+    container_name: teamcity-server
+    restart: unless-stopped
+    privileged: false
+    volumes:
+      - teamcity_data:/data/teamcity_server/datadir
+      - teamcity_logs:/opt/teamcity/logs
+      - teamcity_temp:/opt/teamcity/temp
+    ports:
+      - "0.0.0.0:${TEAMCITY_PORT}:8111"    
+    networks:
+      - teamcity_net
+    healthcheck:
+      test: curl -s http://localhost:8111 >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+    depends_on:
+      teamcity-db:
+        condition: service_healthy
+    
+  # teamcity agent 1
+  teamcity-agent-1:
+    image: jetbrains/teamcity-agent:${TEAMCITY_VERSION}-linux-sudo
+    container_name: teamcity-agent-1
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - teamcity_agent_tools_1:/opt/buildagent/tools
+      - teamcity_agent_work_1:/opt/buildagent/work
+      - teamcity_agent_docker_1:/var/lib/docker:/var/lib/docker
+      - teamcity_agent_logs_1:/opt/buildagent/logs
+      - teamcity_agent_plugins_1:/opt/buildagent/plugins
+      - teamcity_agent_system_1:/opt/buildagent/system
+      - teamcity_agent_temp_1:/opt/buildagent/temp
+      - teamcity_agent_conf_1:/data/teamcity_agent/conf
+    environment:
+      - SERVER_URL=teamcity-server:8111
+      - DOCKER_IN_DOCKER=start
+    networks:
+      - teamcity_net
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+    depends_on:
+      teamcity-server:
+        condition: service_healthy
+
+  # teamcity agent 2
+  teamcity-agent-2:
+    image: jetbrains/teamcity-agent:${TEAMCITY_VERSION}-linux-sudo
+    container_name: teamcity-agent-2
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - teamcity_agent_tools_2:/opt/buildagent/tools
+      - teamcity_agent_work_2:/opt/buildagent/work
+      - teamcity_agent_docker_2:/var/lib/docker:/var/lib/docker
+      - teamcity_agent_logs_2:/opt/buildagent/logs
+      - teamcity_agent_plugins_2:/opt/buildagent/plugins
+      - teamcity_agent_system_2:/opt/buildagent/system
+      - teamcity_agent_temp_2:/opt/buildagent/temp
+      - teamcity_agent_conf_2:/data/teamcity_agent/conf
+    environment:
+      - SERVER_URL=teamcity-server:8111
+      - DOCKER_IN_DOCKER=start
+    networks:
+      - teamcity_net
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+    depends_on:
+      teamcity-server:
+        condition: service_healthy
+    
+  # teamcity agent 3
+  teamcity-agent-3:
+    image: jetbrains/teamcity-agent:${TEAMCITY_VERSION}-linux-sudo
+    container_name: teamcity-agent-3
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - teamcity_agent_tools_3:/opt/buildagent/tools
+      - teamcity_agent_work_3:/opt/buildagent/work
+      - teamcity_agent_docker_3:/var/lib/docker:/var/lib/docker
+      - teamcity_agent_logs_3:/opt/buildagent/logs
+      - teamcity_agent_plugins_3:/opt/buildagent/plugins
+      - teamcity_agent_system_3:/opt/buildagent/system
+      - teamcity_agent_temp_3:/opt/buildagent/temp
+      - teamcity_agent_conf_3:/data/teamcity_agent/conf
+    environment:
+      - SERVER_URL=teamcity-server:8111
+      - DOCKER_IN_DOCKER=start
+    networks:
+      - teamcity_net
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+    depends_on:
+      teamcity-server:
+        condition: service_healthy
