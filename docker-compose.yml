@@ -36,6 +36,8 @@ networks:
 services:
   # teamcity database
   teamcity-db:
+    security_opt:
+      - no-new-privileges:true
     image: postgres:${PG_VERSION}
     container_name: teamcity-db
     restart: unless-stopped
@@ -64,6 +66,8 @@ services:
 
   # teamcity server
   teamcity-server:
+    security_opt:
+      - no-new-privileges:true
     image: jetbrains/teamcity-server:${TEAMCITY_VERSION}
     container_name: teamcity-server
     restart: unless-stopped
