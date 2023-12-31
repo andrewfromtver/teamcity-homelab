@@ -15,6 +15,6 @@
 * `TEAMCITY_UI_PORT=80`
 
 * `SONAR_VERSION=community`
-* `SONAR_DB=sonar_db_db`
+* `SONAR_DB=sonar_db_name`
 * `SONAR_UI_PORT=9000`
 * `SONAR_SERVICE_PORT=9092`
