@@ -29,15 +29,11 @@ volumes:
   teamcity_agent_system_3:
   teamcity_agent_temp_3:
   teamcity_agent_conf_3:
-  sonarqube_data:
-  sonarqube_extensions:
-  sonarqube_logs:
 
 networks:
   teamcity_net:
 
 services:
-  # database
   db:
     security_opt:
       - no-new-privileges:true
@@ -47,19 +43,17 @@ services:
     restart: unless-stopped
     privileged: false
     environment:
-      - POSTGRES_MULTIPLE_DATABASES=${TEAMCITY_DB},${SONAR_DB}
+      - POSTGRES_DB=${PG_DB}
       - POSTGRES_USER=${PG_USER}
       - POSTGRES_PASSWORD=${PG_PASSWORD}
       - PG_DATA=/var/lib/postgresql/data
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
-    ports:
-      - 0.0.0.0:${PG_PORT}:5432
     networks:
       - teamcity_net
     healthcheck:
-      test: pg_isready -U ${PG_USER} -d ${TEAMCITY_DB}
+      test: pg_isready -U ${PG_USER} -d ${PG_DB}
       interval: 30s
       timeout: 10s
       retries: 10
@@ -69,7 +63,6 @@ services:
           cpus: "2"
           memory: 2G
 
-  # teamcity server
   teamcity-server:
     security_opt:
       - no-new-privileges:true
@@ -100,7 +93,6 @@ services:
       db:
         condition: service_healthy
     
-  # teamcity agent 1
   teamcity-agent-1:
     image: jetbrains/teamcity-agent:${TEAMCITY_VERSION}-linux-sudo
     hostname: teamcity-agent-1
@@ -130,7 +122,6 @@ services:
       teamcity-server:
         condition: service_healthy
 
-  # teamcity agent 2
   teamcity-agent-2:
     image: jetbrains/teamcity-agent:${TEAMCITY_VERSION}-linux-sudo
     hostname: teamcity-agent-2
@@ -160,7 +151,6 @@ services:
       teamcity-server:
         condition: service_healthy
     
-  # teamcity agent 3
   teamcity-agent-3:
     image: jetbrains/teamcity-agent:${TEAMCITY_VERSION}-linux-sudo
     hostname: teamcity-agent-3
@@ -189,33 +179,3 @@ services:
     depends_on:
       teamcity-server:
         condition: service_healthy
-
-  # sonar qube
-  sonarqube:
-    image: sonarqube:${SONAR_VERSION}
-    hostname: sonarqube
-    container_name: sonarqube
-    restart: unless-stopped
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
-    environment:
-      - SONAR_JDBC_URL=jdbc:postgresql://db:5432/${SONAR_DB}
-      - SONAR_JDBC_USERNAME=${PG_USER}
-      - SONAR_JDBC_PASSWORD=${PG_PASSWORD}
-    ports:
-      - "0.0.0.0:${SONAR_UI_PORT}:9000"
-      - "0.0.0.0:${SONAR_SERVICE_PORT}:9092"
-    networks:
-      - teamcity_net
-    healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://sonarqube:9000 || exit 1
-      interval: 30s
-      timeout: 10s
-      retries: 10
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: 2G
