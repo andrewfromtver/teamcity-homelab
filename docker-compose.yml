@@ -60,8 +60,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "2"
-          memory: 2G
+          cpus: ${DB_CPU}
+          memory: ${DB_RAM}
 
   teamcity-server:
     security_opt:
@@ -87,8 +87,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "2"
-          memory: 2G
+          cpus: ${SERVER_CPU}
+          memory: ${SERVER_RAM}
     depends_on:
       db:
         condition: service_healthy
@@ -116,8 +116,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: 1G
+          cpus: ${AGENT_CPU}
+          memory: ${AGENT_RAM}
     depends_on:
       teamcity-server:
         condition: service_healthy
@@ -145,8 +145,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: 1G
+          cpus: ${AGENT_CPU}
+          memory: ${AGENT_RAM}
     depends_on:
       teamcity-server:
         condition: service_healthy
@@ -174,8 +174,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1"
-          memory: 1G
+          cpus: ${AGENT_CPU}
+          memory: ${AGENT_RAM}
     depends_on:
       teamcity-server:
         condition: service_healthy
