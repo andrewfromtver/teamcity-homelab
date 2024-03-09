@@ -56,6 +56,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
+    shm_size: ${DB_SHM}
     deploy:
       resources:
         limits:
@@ -83,6 +84,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
+    shm_size: ${SERVER_SHM}
     deploy:
       resources:
         limits:
@@ -112,6 +114,7 @@ services:
       - DOCKER_IN_DOCKER=start
     networks:
       - teamcity_net
+    shm_size: ${AGENT_SHM}
     deploy:
       resources:
         limits:
@@ -170,6 +173,7 @@ services:
       - DOCKER_IN_DOCKER=start
     networks:
       - teamcity_net
+    shm_size: ${AGENT_SHM}
     deploy:
       resources:
         limits:
